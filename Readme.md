@@ -78,7 +78,7 @@ clientes_contatados.txt
 
 Isso impede que o bot envie mensagens duplicadas. 
 
-**IMPORTANTE:** O arquivo .txtdeve estar no mesmo diretório que a aplicação
+**IMPORTANTE:** O arquivo .txt deve estar no mesmo diretório que a aplicação
 
 ---
 
