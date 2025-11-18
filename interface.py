@@ -13,7 +13,6 @@ class Application:
         self.master.title("Envio Automático WhatsApp")
         self.master.geometry("480x300")
 
-        # Mensagem inicial padrão
         self.mensagem = StringVar(value="Olá! Esta é uma mensagem automática de teste.")
 
         # Widgets principais
@@ -87,9 +86,6 @@ class Application:
         Thread(target=self.bot.enviar_mensagens).start()
 
 
-# ==============================
-# EXECUÇÃO
-# ==============================
 if __name__ == "__main__":
     root = Tk()
     app = Application(root)

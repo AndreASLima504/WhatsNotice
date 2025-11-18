@@ -1,9 +1,4 @@
 from selenium import webdriver
-# import selenium.webdriver
-# import selenium.webdriver.firefox
-# import selenium.webdriver.common
-# import selenium.webdriver.support
-# import selenium.webdriver.remote
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.action_chains import ActionChains
@@ -12,10 +7,6 @@ from threading import Thread
 import time
 import os
 
-
-# ==============================
-# SERVIÇO DE AUTOMAÇÃO
-# ==============================
 class WhatsAppBot:
     def __init__(self, mensagem, delay=3, status_callback=None):
         self.mensagem = mensagem
@@ -39,7 +30,6 @@ class WhatsAppBot:
     def rolar_lista_para_baixo(self, destino):
             print("Rolando lista para baixo...")
             self.driver.execute_script("arguments[0].scrollIntoView();", destino)
-            # destino.click()
             time.sleep(1.5)
             
 
@@ -70,38 +60,62 @@ class WhatsAppBot:
 
         while True:
 
-            chats = self.driver.find_elements(By.XPATH, "//div[@role='row']")
-            print("Atualizando conversas. Total encontrado:", len(chats))
-
-            novos_chats = self.filtrar_chats_novos(chats)
-            print("Não lidas:", len(novos_chats))
-            
-            while not novos_chats:
-                try:
-                    self.rolar_lista_para_baixo(chats[-1])
-                except Exception as e:
-                    print("Erro ao rolar lista ->", e)
-                    if self.status_callback:
-                        self.status_callback("⚠️ Erro ao rolar a lista.")
-                    break
-
-                # Recarregar a lista após rolar
+            while True:
+                actions = ActionChains(self.driver)
+                actions.send_keys(Keys.ESCAPE).perform()
                 chats = self.driver.find_elements(By.XPATH, "//div[@role='row']")
                 novos_chats = self.filtrar_chats_novos(chats)
 
-                print("Após scroll → Total:", len(chats), "| Não lidas:", len(novos_chats))
+                print(f"Atualizando conversas → Total: {len(chats)} | Não lidas: {len(novos_chats)}")
 
-            for chat, nome in novos_chats:
+                if novos_chats:  # SE TEM NÃO LIDOS → SAI
+                    break
+
+                if not chats:
+                    print("⚠️ Nenhum chat visível. Aguardando reconstrução...")
+                    time.sleep(1)
+                    continue
+
+                try:
+                    
+                    self.rolar_lista_para_baixo(chats[-1])
+                except Exception as e:
+                    print("Erro ao rolar lista ->", e)
+                    time.sleep(1)
+                    continue
+
+                time.sleep(1)
+
+        
+            for _chat_element, nome in novos_chats:
+
                 try:
                     if self.status_callback:
                         self.status_callback(f"💬 Enviando mensagem para {nome}...")
 
-                    # Scroll até o chat
-                    self.driver.execute_script("arguments[0].scrollIntoView();", chat)
-                    chat.click()
-                    time.sleep(2)
+                    chat_fresco = None
+                    actions = ActionChains(self.driver)
+                    actions.send_keys(Keys.ESCAPE).perform()
+                    chats_visiveis = self.driver.find_elements(By.XPATH, "//div[@role='row']")
 
-                    # Input da mensagem
+                    for c in chats_visiveis:
+                        try:
+                            span = c.find_element(By.XPATH, ".//span[@title]")
+                            if span.get_attribute("title") == nome:
+                                chat_fresco = c
+                                break
+                        except:
+                            continue
+
+                    if not chat_fresco:
+                        print(f"❌ Chat de {nome} não encontrado após stale refresh.")
+                        continue
+
+                    self.driver.execute_script("arguments[0].scrollIntoView();", chat_fresco)
+                    time.sleep(0.5)
+                    chat_fresco.click()
+                    time.sleep(1.5)
+
                     try:
                         text_box = self.driver.find_element(
                             By.XPATH,
@@ -113,32 +127,36 @@ class WhatsAppBot:
                         print("Erro ao localizar caixa de mensagem ->", e)
                         if self.status_callback:
                             self.status_callback(f"⚠️ Não foi possível encontrar a caixa de mensagem para {nome}.")
-                            self.registrar_mensagem_enviada(nome)
+                        self.registrar_mensagem_enviada(nome)
                         continue
+                    
+                    # Envio da mensagem
+                    for char in self.mensagem:
+                        text_box.send_keys(char)
+                    text_box.send_keys(Keys.ENTER)
 
-                    # Enviar de fato (se quiser ativar)
-                    # for char in self.mensagem:
-                    #     text_box.send_keys(char)
-                    # text_box.send_keys(Keys.ENTER)
-
-                    # Registrar contato
                     self.registrar_mensagem_enviada(nome)
+
                     if self.status_callback:
                         self.status_callback(f"✅ Mensagem enviada para {nome}")
 
                     time.sleep(self.delay)
 
                 except Exception as e:
-                    print("Erro ao enviar mensagem para", nome, "->", e)
+                    print(f"Erro ao enviar mensagem para {nome} -> {e}")
                     if self.status_callback:
                         self.status_callback(f"⚠️ Erro ao enviar para {nome}.")
-                    continue  # NÃO PARA O LOOP → continua com os próximos
+                    continue
 
-
+            # =====================================================
+            # 3. SCROLL FINAL PARA FORÇAR O WHATSAPP A ATUALIZAR
+            # =====================================================
             try:
+                actions = ActionChains(self.driver)
+                actions.send_keys(Keys.ESCAPE).perform()
                 chats_atualizados = self.driver.find_elements(By.XPATH, "//div[@role='row']")
                 if chats_atualizados:
-                    self.driver.execute_script("arguments[0].scrollIntoView();", chats_atualizados[-1])
-                    time.sleep(2)
+                    self.rolar_lista_para_baixo(chats_atualizados[-1])
+                    time.sleep(1)
             except Exception as e:
                 print("Erro ao rolar lista no final ->", e)
