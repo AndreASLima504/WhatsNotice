@@ -61,24 +61,32 @@ python interface.py
 ## ▶️ Como Usar
 
 1. Abra o programa (interface Tkinter)
-2. Clique em **Iniciar Driver**
-3. No navegador que abrir, faça login no **WhatsApp Web**
-4. Clique em **Iniciar envio**
-5. O bot começará a varrer a lista de conversas e enviar mensagens automáticas para contatos não lidos
+2. Escreva a mensagem que deseja enviar para os contatos
+3. Clique em **Iniciar Driver**
+4. No navegador que abrir, faça login no **WhatsApp Web**
+5. Clique em **Atualizar lista de contatos**
+6. O bot começará a varrer a lista de conversas e registrar os nomes dos contatos na lista de contatos
+7. Clique em **Iniciar envio**
+8. O bot comecará a enviar a mensagem automaticamente para os contatos da lista de contatos que não estão em "clientes_contatados"
 
 ---
 
 ## 📁 Armazenamento de Contatos
 
+Contatos são registrados em:
+
+```
+lista_contatos.txt
+```
+
 Contatos já atendidos são registrados em:
-
 ```
-clientes_contatados.txt
+lista_contatos.txt
 ```
 
-Isso impede que o bot envie mensagens duplicadas. 
+Isso impede que o bot envie mensagens duplicadas quando for necessário parar no meio do processo e continuar mais tarde. 
 
-**IMPORTANTE:** O arquivo .txt deve estar no mesmo diretório que a aplicação
+**IMPORTANTE:** Os arquivos .txt devem estar no mesmo diretório que a aplicação
 
 ---
 
