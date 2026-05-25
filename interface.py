@@ -44,6 +44,16 @@ class Application:
             command=self.iniciar_envio
         )
         self.botao_enviar.pack(pady=5)
+        
+        self.botao_atualizar_lista = Button(
+            self.frame,
+            text="Atualizar lista de contatos",
+            font=("Calibri", 10),
+            width=20,
+            state=DISABLED,
+            command=self.atualizar_lista_contatos
+        )
+        self.botao_atualizar_lista.pack(pady=5)
 
         # Status
         self.status_label = Label(self.frame, text="", font=("Calibri", 9), fg="green", wraplength=400, justify="center")
@@ -74,6 +84,7 @@ class Application:
             self.bot.iniciar_driver()
             self.atualizar_status("✅ WhatsApp Web aberto. Escaneie o QR Code e clique em 'Iniciar envio'.")
             self.botao_enviar.config(state=NORMAL)
+            self.botao_atualizar_lista.config(state=NORMAL)
 
         Thread(target=run_driver).start()
 
@@ -84,6 +95,14 @@ class Application:
 
         self.atualizar_status("🚀 Iniciando envio de mensagens...")
         Thread(target=self.bot.enviar_mensagens).start()
+        
+    def atualizar_lista_contatos(self):
+        if not self.bot:
+            self.atualizar_status("⚠️ Abra o WhatsApp Web primeiro.")
+            return
+
+        self.atualizar_status("🚀 Atualizando lista de contatos...")
+        Thread(target=self.bot.buscar_contatos).start()
 
 
 if __name__ == "__main__":
