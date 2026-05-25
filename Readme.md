@@ -88,13 +88,3 @@ Isso impede que o bot envie mensagens duplicadas quando for necessário parar no
 
 **IMPORTANTE:** Os arquivos .txt devem estar no mesmo diretório que a aplicação
 
----
-
-## ⚠️ Aviso Legal
-
-Este projeto tem finalidade **educacional**.
-Automatizar o WhatsApp Web pode violar seus termos de serviço.
-Use por sua conta e risco.
-
----
-
